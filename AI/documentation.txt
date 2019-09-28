@@ -1,0 +1,17 @@
+trained on:
+    3574 midis, each couple of mins long
+
+data processing (unshifted)
+    --- it took 2790.143210887909 seconds to do that ---
+
+data processing (shifted)
+    --- it took 2451.8358674049377 seconds to do that ---
+
+chord lstm training (on unshifted keys of)
+    --- it took 486.4289288520813 seconds to train the chord lstm for -- 100 epochs
+
+chord lstm training (on shifted keys)
+    --- it took 598.6552739143372 seconds to train the chord lstm for -- 100 epochs
+
+polyphonic lstm training (on shifted keys)
+    --- it took 5138.873856544495 seconds to train polyphonic lstm model for 100 epochs

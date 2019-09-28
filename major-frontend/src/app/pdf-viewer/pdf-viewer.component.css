@@ -1,0 +1,15 @@
+:host, :host-context {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+}
+
+#dialog-content {
+	flex: auto;
+	overflow-y: hidden;
+}
+
+#pdf {
+	width: 100%;
+	height: 100%;
+}

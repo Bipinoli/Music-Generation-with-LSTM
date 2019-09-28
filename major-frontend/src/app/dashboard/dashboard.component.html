@@ -1,0 +1,144 @@
+<mat-sidenav-container [autosize]="true" [hasBackdrop]=false>
+  <mat-sidenav #sidenav mode=side [(opened)]="opened">
+    <div class="logo">
+      <mat-icon mat-list-icon class="logo-icon" style="height:100%; position:relative; top:45%; " (click)="sidenav.toggle()">
+        <img src="../assets/icons/logo6.png" style="height:5rem; " />
+      </mat-icon>
+    </div>
+
+    <div class="control-panel">
+      <div class="mat-spinner" *ngIf="controlPanelLoading !== 0">
+        <mat-spinner></mat-spinner>
+      </div>
+      <fieldset class="current-playing">
+        <legend>Current Playing</legend>
+        <div class="current-playing-desc">
+          <div>
+            <h4>SONG</h4>
+            <mat-form-field>
+              <mat-label>Select Song</mat-label>
+              <mat-select (selectionChange)="midiFileChange($event)">
+                <mat-option *ngFor="let musicFile of musicFiles" [value]="musicFile">
+                  {{musicFile}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="instruments-used">
+            <h4>INSTRUMENTS USED</h4>
+            <mat-form-field *ngFor="let channelInstrument of channelsInstrumentsList;">
+              <label>Channel: {{channelInstrument.channel}}</label>
+              <mat-select [value]='channelInstrument.instrument' (selectionChange)="soundFontChange($event, channelInstrument.channel)">
+                <mat-option *ngFor="let instrument of instrumentsList" [value]="instrument">
+                  {{instrument}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="midi-file-input-container">
+          <button mat-raised-button color="primary" class="midi-file-input-button">
+            <label for="midi-file-input" style="width: 100%; height: 100%; cursor: pointer;">Upload MIDI file</label>
+          </button>
+          <input #midiFileInput id="midi-file-input" type="file" accept=".mid" (change)="uploadMidiFile($event)" style="display: none;" />
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Generate music</legend>
+        <div class="generate-input-fields">
+          <mat-form-field class="genre-options">
+            <mat-label>Select Genre</mat-label>
+            <mat-select [(value)]='genreSelected'>
+              <mat-option *ngFor="let genre of genreList" [value]="genre.id">
+                {{genre.name | uppercase}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field class="instrument-options">
+            <mat-label>Select Instrument</mat-label>
+            <mat-select [(value)]='instrumentSelected'>
+              <mat-option *ngFor="let instrument of instrumentList" [value]="instrument.id">
+                {{instrument.name | uppercase}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field class="key-options">
+            <mat-label>Select Key</mat-label>
+            <mat-select [(value)]="keySelected">
+              <mat-option *ngFor="let key of keyList" [value]="key">
+                {{key | uppercase}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field class="number-of-bars">
+            <input matInput [(ngModel)]="numBars" placeholder="Number of bars" min="1" value="64" type="number" />
+          </mat-form-field>
+          <mat-form-field class="bpm">
+            <input matInput [(ngModel)]="bpm" placeholder="Beats per minute" value="100" type="number" />
+          </mat-form-field>
+          <mat-form-field class="seed-length">
+            <input matInput [(ngModel)]="seedLength" placeholder="Seed Length" value="4" type="number" />
+          </mat-form-field>
+        </div>
+
+        <div class="slider-container">
+          <div class="note-cap">
+            <h4>Note Cap</h4>
+            <mat-slider [(ngModel)]="noteCap" min="1" max="5" step="1" value="4" tickInterval="1" vertical="true" [thumbLabel]="true"></mat-slider>
+          </div>
+        
+          <div class="temperature">
+            <h4>Temperature</h4>
+            <mat-slider [(ngModel)]="chordTemperature" min="0.1" max="2" step="0.1" value="1" vertical="true" [thumbLabel]="true"></mat-slider>
+          </div>
+        
+          <div class="octave">
+            <h4>Octave</h4>
+            <div>
+              <mat-slider [(ngModel)]="whichOctave" min="0" [max]="octaveType === 'lower'? 2 : 3" step="1" value="2" vertical="true" [thumbLabel]="true"></mat-slider>
+              <mat-radio-group class="octave-type" [(ngModel)]="octaveType">
+                <mat-radio-button class="octave-type-option" *ngFor="let octaveType of octaveTypes" [value]="octaveType">
+                  {{octaveType}}
+                </mat-radio-button>
+              </mat-radio-group>
+            </div>
+          </div>
+        </div>
+        
+        <div class="generate">
+          <button class="generate-button" mat-raised-button (click)="generateMusic()">Generate New</button>
+          <button *ngIf="musicIsGenerated" class="modify-button" mat-raised-button color="accent" (click)="modifyMusic()">Modify</button>
+          <a *ngIf="musicIsGenerated" href="{{VIEW_PDF_URL}}" target="_blank" class="view-music-sheet-button" mat-raised-button color="accent">View Music Sheet</a>
+          <a *ngIf="musicIsGenerated" [disabled]="shouldDisableDownloadAsMp3Button()" href="{{DOWNLOAD_MUSIC_URL}}" class="download-music-button" mat-raised-button color="accent">Download as MP3</a>
+        </div>
+      </fieldset>
+    </div>
+
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+
+    <mat-toolbar class="matbar" color="accent">
+
+      <button mat-button class="menu-toggle" (click)="toggleSideNav()">
+        <mat-icon>menu</mat-icon>
+      </button>
+      <span class="app-title">AIM (AI in Music generation)</span>
+      <div class="logout">
+        <button class="logout-button" (click)= "logoutClick()">Logout</button>
+      </div>
+
+    </mat-toolbar>
+
+    <div id="visualizer">
+      <button mat-raised-button id="toggle-piano-input-button" (click)="togglePianoInput()">{{pianoInputEnabled ? "Disable Piano Input": "Enable Piano Input"}}</button>
+      <div #canvas id="canvas"></div>
+    </div>
+    <app-audio-player #audioPlayer id="audio-player" [totalTime]="musicLength" (statusChange)="handlePlayerStatusChange($event)"></app-audio-player>
+  </mat-sidenav-content>
+
+</mat-sidenav-container>

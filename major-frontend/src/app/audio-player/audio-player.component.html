@@ -1,0 +1,20 @@
+<div id="player">
+  <span id="playing-time">{{ convertIntoTimeFormat(timePosition) }}</span>
+  <button id="backward" mat-icon-button (click)="fastRewind()">
+    <mat-icon>fast_rewind</mat-icon>
+  </button>
+  <button id="play-pause" [ngClass]="{ 'playing': isPlaying}" (click)="playPauseClick()">
+  </button>
+  <button id="stop" mat-icon-button (click)="stop()">
+    <mat-icon>stop</mat-icon>
+  </button>
+  <button id="forward" mat-icon-button (click)="fastForward()">
+    <mat-icon>fast_forward</mat-icon>
+  </button>
+  <div id="slider" (click)="handleSeek($event)">
+    <div id="slider-active" [ngStyle]="{ width: timePosition / totalTime * 100 + '%'}"></div>
+    <div #sliderBackground id="slider-background"></div>
+    <div id="cursor" [ngStyle]="{ left: timePosition / totalTime * 100 + '%'}" (mousedown)="handleCursorMouseDown($event)"></div>
+  </div>
+  <span id="remaining-time">-{{ convertIntoTimeFormat(totalTime - timePosition) }}</span>
+</div>
